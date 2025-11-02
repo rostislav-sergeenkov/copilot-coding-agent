@@ -731,19 +731,11 @@ footer {
 @media (max-width: 600px) {
   #user-controls {
     right: 15px;
-    top: 50px;
+    top: 60px;
   }
   
   #dark-mode-toggle {
-    top: 50px;
-    right: 15px;
-  }
-  
-  body:not(.not-authenticated) #dark-mode-toggle {
     top: 10px;
-  }
-  
-  body:not(.not-authenticated) #user-controls {
-    top: 50px;
+    right: 15px;
   }
 }
