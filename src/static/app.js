@@ -496,6 +496,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const url = getActivityShareUrl(activityName);
     const text = getShareText(activityName, description);
     
+    // Fallback copy function for older browsers
+    function fallbackCopyToClipboard(text) {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        showMessage('Link copied to clipboard!', 'success');
+      } catch (err) {
+        showMessage('Failed to copy link', 'error');
+      }
+      document.body.removeChild(textArea);
+    }
+    
     let shareUrl;
     
     switch(platform) {
@@ -531,23 +548,6 @@ document.addEventListener("DOMContentLoaded", () => {
           fallbackCopyToClipboard(url);
         }
         break;
-    }
-    
-    // Fallback copy function for older browsers
-    function fallbackCopyToClipboard(text) {
-      const textArea = document.createElement('textarea');
-      textArea.value = text;
-      textArea.style.position = 'fixed';
-      textArea.style.opacity = '0';
-      document.body.appendChild(textArea);
-      textArea.select();
-      try {
-        document.execCommand('copy');
-        showMessage('Link copied to clipboard!', 'success');
-      } catch (err) {
-        showMessage('Failed to copy link', 'error');
-      }
-      document.body.removeChild(textArea);
     }
   }
 
