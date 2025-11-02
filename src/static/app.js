@@ -484,6 +484,13 @@ document.addEventListener("DOMContentLoaded", () => {
     return `Check out ${activityName} at Mergington High School! ${description}`;
   }
 
+  // Function to escape HTML to prevent XSS
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
   // Function to handle sharing via different platforms
   function shareActivity(platform, activityName, description) {
     const url = getActivityShareUrl(activityName);
@@ -511,25 +518,36 @@ document.addEventListener("DOMContentLoaded", () => {
         
       case 'copy':
         // Copy link to clipboard
-        navigator.clipboard.writeText(url).then(() => {
-          showMessage('Link copied to clipboard!', 'success');
-        }).catch(() => {
-          // Fallback for older browsers
-          const textArea = document.createElement('textarea');
-          textArea.value = url;
-          textArea.style.position = 'fixed';
-          textArea.style.opacity = '0';
-          document.body.appendChild(textArea);
-          textArea.select();
-          try {
-            document.execCommand('copy');
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          // Use modern clipboard API if available
+          navigator.clipboard.writeText(url).then(() => {
             showMessage('Link copied to clipboard!', 'success');
-          } catch (err) {
-            showMessage('Failed to copy link', 'error');
-          }
-          document.body.removeChild(textArea);
-        });
+          }).catch(() => {
+            // Fallback if clipboard API fails
+            fallbackCopyToClipboard(url);
+          });
+        } else {
+          // Use fallback for older browsers
+          fallbackCopyToClipboard(url);
+        }
         break;
+    }
+    
+    // Fallback copy function for older browsers
+    function fallbackCopyToClipboard(text) {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        showMessage('Link copied to clipboard!', 'success');
+      } catch (err) {
+        showMessage('Failed to copy link', 'error');
+      }
+      document.body.removeChild(textArea);
     }
   }
 
@@ -581,23 +599,24 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
 
     // Create share buttons
+    const escapedName = escapeHtml(name);
     const shareButtons = `
       <div class="share-container">
         <div class="share-label">Share this activity:</div>
         <div class="share-buttons">
-          <button class="share-button twitter" data-platform="twitter" data-activity="${name}" title="Share on Twitter">
+          <button class="share-button twitter" data-platform="twitter" data-activity="${escapedName}" title="Share on Twitter">
             <span class="share-icon">🐦</span>
             <span>Twitter</span>
           </button>
-          <button class="share-button facebook" data-platform="facebook" data-activity="${name}" title="Share on Facebook">
+          <button class="share-button facebook" data-platform="facebook" data-activity="${escapedName}" title="Share on Facebook">
             <span class="share-icon">📘</span>
             <span>Facebook</span>
           </button>
-          <button class="share-button email" data-platform="email" data-activity="${name}" title="Share via Email">
+          <button class="share-button email" data-platform="email" data-activity="${escapedName}" title="Share via Email">
             <span class="share-icon">✉️</span>
             <span>Email</span>
           </button>
-          <button class="share-button copy" data-platform="copy" data-activity="${name}" title="Copy Link">
+          <button class="share-button copy" data-platform="copy" data-activity="${escapedName}" title="Copy Link">
             <span class="share-icon">🔗</span>
             <span>Copy Link</span>
           </button>
